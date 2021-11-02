@@ -1,0 +1,44 @@
+FROM golang:1.16-alpine as build
+
+WORKDIR /app
+
+ENV GOOS=linux \
+    GOARCH=amd64 \
+    USER=appuser \
+    UID=1000
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    "${USER}"
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+
+RUN go build -ldflags="-w -s" -o /go/bin/app
+
+
+FROM alpine
+
+ARG BUILD_VERSION=0.0.0
+LABEL org.opencontainers.image.source=https://github.com/WirePact/k8s-pki
+
+WORKDIR /app
+
+ENV GIN_MODE=release \
+    PORT=8080 \
+    KUBERNETES_SECRET_NAME=wirepact-pki-ca \
+    PKI_VERSION=${BUILD_VERSION}
+
+COPY --from=build /etc/passwd /etc/group /etc/
+COPY --from=build /go/bin/app /go/bin/app
+
+USER appuser:appuser
+
+CMD /go/bin/app -port ${PORT} -secret ${KUBERNETES_SECRET_NAME}
