@@ -27,7 +27,8 @@ RUN go build -ldflags="-w -s" -o /go/bin/app
 FROM alpine
 
 ARG BUILD_VERSION=0.0.0
-LABEL org.opencontainers.image.source=https://github.com/WirePact/k8s-pki
+LABEL org.opencontainers.image.source=https://github.com/WirePact/k8s-pki \
+    org.opencontainers.image.description="This is the PKI for WirePact when run in Kubernetes with the Operator."
 
 WORKDIR /app
 
