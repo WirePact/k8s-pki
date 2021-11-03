@@ -8,6 +8,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -16,20 +17,27 @@ import (
 
 var ca *x509.Certificate
 var caCertificates *tls.Certificate
+var caLocalMode bool
 
 // PrepareCA loads the secret in the actual namespace that
 // contains the CA certificate for the PKI. If no certificate
 // is found, the PKI creates a new CA certificate and stores it
-// in the defined Kubernetes secret.
-func PrepareCA(secretName string) {
-	initSecret(secretName)
+// in the defined Kubernetes secret. If localMode is set,
+// the ca gets created in the filesystem instead of the Kubernetes secret.
+func PrepareCA(secretName string, localMode bool) {
+	caLocalMode = localMode
+	if !localMode {
+		initSecret(secretName)
+	}
 
-	if doesSecretExist() {
-		// secret is found. Load CA from secret.
+	if caExists() {
+		// secret is found. Load CA from secret/file.
 		caCertificates, ca = loadCA()
 	} else {
-		// Secret is not found. Create CA and secret.
-		createSecret()
+		// Secret is not found. Create CA and secret/file.
+		if !localMode {
+			createSecret()
+		}
 		caCertificates, ca = createCA()
 	}
 }
@@ -74,6 +82,18 @@ func SignCSR(csrBytes []byte) ([]byte, error) {
 	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: clientCertRaw}), nil
 }
 
+func caExists() bool {
+	if caLocalMode {
+		if _, err := os.Stat("ca.crt"); err == nil {
+			return true
+		} else {
+			return false
+		}
+	} else {
+		return doesSecretExist()
+	}
+}
+
 func createCA() (*tls.Certificate, *x509.Certificate) {
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(getNextSerialnumber()),
@@ -104,10 +124,26 @@ func createCA() (*tls.Certificate, *x509.Certificate) {
 	keyOut := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)})
 	logrus.Debugln("Wrote Private Key bytes")
 
-	updateSecretWithFunction(func(secret *v1.Secret) {
-		secret.Data[secretCACertKey] = certOut
-		secret.Data[secretCAKeyKey] = keyOut
-	})
+	if caLocalMode {
+		certFile, err := os.Create("ca.crt")
+		if err != nil {
+			logrus.WithError(err).Fatalln("Could not create CA certificate file 'ca.crt'.")
+		}
+		_, _ = certFile.Write(certOut)
+		_ = certFile.Close()
+
+		keyFile, err := os.Create("ca.key")
+		if err != nil {
+			logrus.WithError(err).Fatalln("Could not create CA key file 'ca.key'.")
+		}
+		_, _ = keyFile.Write(keyOut)
+		_ = keyFile.Close()
+	} else {
+		updateSecretWithFunction(func(secret *v1.Secret) {
+			secret.Data[secretCACertKey] = certOut
+			secret.Data[secretCAKeyKey] = keyOut
+		})
+	}
 
 	logrus.Infoln("Created and stored CA certificate with private key.")
 
@@ -125,11 +161,21 @@ func createCA() (*tls.Certificate, *x509.Certificate) {
 }
 
 func loadCA() (*tls.Certificate, *x509.Certificate) {
-	secret := getSecret()
 
-	caCertificates, err := tls.X509KeyPair(secret.Data[secretCACertKey], secret.Data[secretCAKeyKey])
-	if err != nil {
-		logrus.WithError(err).Fatalln("Could not correctly load CA certificate.")
+	var caCertificates tls.Certificate
+	var err error
+
+	if caLocalMode {
+		caCertificates, err = tls.LoadX509KeyPair("ca.crt", "ca.key")
+		if err != nil {
+			logrus.WithError(err).Fatalln("Could not correctly load CA certificate from files.")
+		}
+	} else {
+		secret := getSecret()
+		caCertificates, err = tls.X509KeyPair(secret.Data[secretCACertKey], secret.Data[secretCAKeyKey])
+		if err != nil {
+			logrus.WithError(err).Fatalln("Could not correctly load CA certificate from Kubernetes.")
+		}
 	}
 
 	ca, err := x509.ParseCertificate(caCertificates.Certificate[0])

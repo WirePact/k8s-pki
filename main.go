@@ -13,13 +13,20 @@ import (
 var (
 	port       = flag.Int("port", 8080, "Port for the pki server.")
 	secretName = flag.String("secret", "wirepact-pki-ca", "Name of the Kubernetes secret for the ca certificate.")
+	localMode  = flag.Bool("local", false, "If set, does not use Kubernetes for secret storage but a local file beside the app.")
 )
 
 func main() {
 	flag.Parse()
 
 	logrus.Debugln("Prepare CA.")
-	certificates.PrepareCA(*secretName)
+	if *localMode {
+		logrus.Infof("-local is set, use local filesystem to store CA.")
+	} else {
+		logrus.Infof("-local is not set, use Kubernetes secret '%v' to store CA.", *secretName)
+	}
+
+	certificates.PrepareCA(*secretName, *localMode)
 
 	logrus.Infof("Starting pki server on port ':%v'", *port)
 
