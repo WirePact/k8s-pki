@@ -34,6 +34,9 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
+          build-args: |
+            BUILD_VERSION=${{ env.BUILD_VERSION }}
+            COMMIT_SHA=${{ github.sha }}
           tags: |
             ghcr.io/wirepact/k8s-pki:latest
             ghcr.io/wirepact/k8s-pki:${{ github.sha }}
