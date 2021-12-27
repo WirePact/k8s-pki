@@ -89,9 +89,12 @@ func caExists() bool {
 		} else {
 			return false
 		}
-	} else {
-		return doesSecretExist()
+	} else if doesSecretExist() {
+		secret := getSecret()
+		return secret.Data[secretCACertKey] != "" && secret.Data[secretCAKeyKey] != ""
 	}
+
+	return false
 }
 
 func createCA() (*tls.Certificate, *x509.Certificate) {
