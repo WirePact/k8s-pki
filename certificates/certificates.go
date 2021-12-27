@@ -35,7 +35,7 @@ func PrepareCA(secretName string, localMode bool) {
 		caCertificates, ca = loadCA()
 	} else {
 		// Secret is not found. Create CA and secret/file.
-		if !localMode {
+		if !localMode && !doesSecretExist() {
 			createSecret()
 		}
 		caCertificates, ca = createCA()
