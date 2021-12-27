@@ -91,7 +91,9 @@ func caExists() bool {
 		}
 	} else if doesSecretExist() {
 		secret := getSecret()
-		return secret.Data[secretCACertKey] != "" && secret.Data[secretCAKeyKey] != ""
+		_, certOk := secret.Data[secretCACertKey]
+		_, keyOk := secret.Data[secretCAKeyKey]
+		return certOk && keyOk
 	}
 
 	return false
