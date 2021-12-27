@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -34,6 +35,9 @@ func main() {
 
 	router.GET("ca", api.GetCA)
 	router.POST("csr", api.HandleCSR)
+	router.GET("healthz", func(context *gin.Context) {
+		context.String(http.StatusOK, "healthy")
+	})
 
 	err := router.Run(fmt.Sprintf(":%v", *port))
 	if err != nil {
