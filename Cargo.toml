@@ -1,0 +1,24 @@
+[package]
+name = "k8s-pki"
+version = "0.0.0-development"
+edition = "2021"
+
+[dependencies]
+prost = "0.9"
+prost-types = "0.9"
+tonic = { version = "0.6", features = ["tls", "tls-roots", "tls-roots-common"] }
+tonic-types = "0.4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "fs"] }
+clap = { version = "3.0.14", features = ["derive", "env"] }
+log = "0.4.14"
+env_logger = "0.9.0"
+time = "0.3.7"
+openssl = "0.10.38"
+openssl-sys = "0.9.72"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[build-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tonic-build = "0.6"
