@@ -21,7 +21,7 @@ struct Cli {
 
     /// If set, a local pki storage is used (local file system) instead
     /// of the Kubernetes secret.
-    #[clap(short, long)]
+    #[clap(short, long, env)]
     local: bool,
 
     /// If set, debug log messages are printed as well.
