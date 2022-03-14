@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_client(profile == "debug")
         .compile(&["proto/pki.proto"], INCLUDES)?;
 
-    println!("cargo:rerun-if-changed={}", "proto/pki.proto");
+    println!("cargo:rerun-if-changed=proto/pki.proto");
 
     Ok(())
 }

@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
     }
 
-    let mut store = create_store(cli.local);
+    let mut store = create_store(cli.local, cli.secret_name);
     store.init().await?;
     let pki_service = PkiService { cert_store: store };
 

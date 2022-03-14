@@ -4,7 +4,7 @@ use openssl::asn1::{Asn1Integer, Asn1Time};
 use openssl::bn::BigNum;
 use openssl::hash::MessageDigest;
 use openssl::nid::Nid;
-use openssl::pkey::{PKey, Private};
+use openssl::pkey::{PKey, PKeyRef, Private};
 use openssl::rsa::Rsa;
 use openssl::x509::{X509Name, X509};
 
@@ -15,7 +15,7 @@ pub fn create_new_key() -> Result<PKey<Private>, Box<dyn Error>> {
     Ok(key)
 }
 
-pub fn create_new_ca(serial_number: u32, key: PKey<Private>) -> Result<X509, Box<dyn Error>> {
+pub fn create_new_ca(serial_number: u32, key: &PKeyRef<Private>) -> Result<X509, Box<dyn Error>> {
     let mut name = X509Name::builder()?;
     name.append_entry_by_nid(Nid::COMMONNAME, "PKI")?;
     name.append_entry_by_nid(Nid::ORGANIZATIONNAME, "WirePact PKI CA")?;
@@ -33,8 +33,8 @@ pub fn create_new_ca(serial_number: u32, key: PKey<Private>) -> Result<X509, Box
     )?;
     builder.set_not_before(not_before.as_ref())?;
     builder.set_not_after(not_after.as_ref())?;
-    builder.set_pubkey(&key)?;
-    builder.sign(&key, MessageDigest::sha256())?;
+    builder.set_pubkey(key)?;
+    builder.sign(key, MessageDigest::sha256())?;
 
     Ok(builder.build())
 }
