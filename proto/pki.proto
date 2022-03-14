@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package wirepact.pki;
+
+import "google/protobuf/empty.proto";
+
+// Service for PKI related operations.
+service PkiService {
+  // Return the CA certificate (public part) for this PKI.
+  rpc GetCA(google.protobuf.Empty) returns (CACertificate);
+
+  // Sign a specific CSR with the CA and return the resulting certificate.
+  rpc SignCSR(SignCSRRequest) returns (SignCSRResponse);
+}
+
+// Represents the given CA certificate.
+message CACertificate {
+  // The effective byte data of the certificate.
+  bytes certificate = 1;
+}
+
+// Request to let the PKI sign a CSR.
+message SignCSRRequest{
+  // The certificate signing request (CSR) that shall be signed by the CA.
+  bytes csr = 1;
+}
+
+// The response of the PKI for the CSR.
+message SignCSRResponse{
+  // The signed certificate from the CA.
+  bytes certificate = 1;
+}

@@ -1,0 +1,12 @@
+{
+  "details": {
+    "methodFqn": "wirepact.pki.PkiService.SignCSR"
+  },
+  "requests": [
+    {
+      "location": "SignCSR-request.json"
+    }
+  ],
+  "operationType": "unary",
+  "invokerName": "grpc"
+}

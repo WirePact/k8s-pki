@@ -1,3 +1,2 @@
-*.crt
-*.key
-ca_serialnumbers
+/target
+/ca

@@ -1,0 +1,12 @@
+{
+  "details": {
+    "methodFqn": "wirepact.pki.PkiService.GetCA"
+  },
+  "requests": [
+    {
+      "location": "GetCA-request.json"
+    }
+  ],
+  "operationType": "unary",
+  "invokerName": "grpc"
+}
