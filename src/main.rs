@@ -1,5 +1,6 @@
 use clap::Parser;
 use log::info;
+use tokio::signal::ctrl_c;
 use tonic::transport::Server;
 
 use crate::cert_store::create_store;
@@ -34,10 +35,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     env_logger::builder()
-        .filter_level(match cli.debug {
-            true => log::LevelFilter::Debug,
-            false => log::LevelFilter::Info,
-        })
+        .filter_module(
+            "k8s_pki",
+            match cli.debug {
+                true => log::LevelFilter::Debug,
+                false => log::LevelFilter::Info,
+            },
+        )
         .init();
 
     let address = format!("0.0.0.0:{}", cli.port);
@@ -59,7 +63,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Server::builder()
         .add_service(grpc::pki_service_server::PkiServiceServer::new(pki_service))
-        .serve(address.parse()?)
+        .serve_with_shutdown(address.parse()?, async {
+            let _ = ctrl_c().await;
+            info!("Signal received. Shutting down server.");
+            {}
+        })
         .await?;
 
     Ok(())
