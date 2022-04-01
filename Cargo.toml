@@ -16,7 +16,7 @@ prost-types = "0.9"
 time = "0.3.7"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "fs", "signal"] }
 tonic = { version = "0.6", features = ["tls", "tls-roots", "tls-roots-common"] }
-tonic-types = "0.4"
+tonic-types = "0.5"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
