@@ -1,6 +1,5 @@
 use clap::Parser;
 use log::info;
-use tokio::signal::ctrl_c;
 use tonic::transport::Server;
 
 use crate::cert_store::create_store;
@@ -61,13 +60,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     store.init().await?;
     let pki_service = PkiService { cert_store: store };
 
+    #[cfg(windows)]
+    async fn signal() {
+        use tokio::signal::windows::ctrl_c;
+        let mut stream = ctrl_c().unwrap();
+        stream.recv().await;
+        info!("Signal received. Shutting down server.");
+    }
+
+    #[cfg(unix)]
+    async fn signal() {
+        use log::debug;
+        use tokio::signal::unix::{signal, SignalKind};
+
+        let mut int = signal(SignalKind::interrupt()).unwrap();
+        let mut term = signal(SignalKind::terminate()).unwrap();
+
+        tokio::select! {
+            _ = int.recv() => debug!("SIGINT received."),
+            _ = term.recv() => debug!("SIGTERM received."),
+        }
+
+        info!("Signal received. Shutting down server.");
+    }
+
     Server::builder()
         .add_service(grpc::pki_service_server::PkiServiceServer::new(pki_service))
-        .serve_with_shutdown(address.parse()?, async {
-            let _ = ctrl_c().await;
-            info!("Signal received. Shutting down server.");
-            {}
-        })
+        .serve_with_shutdown(address.parse()?, signal())
         .await?;
 
     Ok(())
