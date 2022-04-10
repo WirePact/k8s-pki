@@ -2,6 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["local>WirePact/renovate-config"],
   "git-submodules": {
-    "enabled": true
+    "enabled": true,
+    "packageRules": [
+      {
+        "matchFiles": [".gitmodules"],
+        "groupName": "external submodules",
+        "groupSlug": "submodules",
+        "semanticCommitType": "chore",
+        "semanticCommitScope": "submodules"
+      }
+    ]
   }
 }
