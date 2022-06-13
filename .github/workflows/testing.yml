@@ -14,16 +14,22 @@ jobs:
         with:
           submodules: true
 
-      - run: rustup component add clippy
+      - run: rustup component add clippy rustfmt
 
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
+          args: --all-features --no-deps
+          name: Lint Results
 
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --check
 
       - uses: actions-rs/cargo@v1
         with:
