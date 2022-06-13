@@ -19,6 +19,15 @@ struct Cli {
     #[clap(short, long, env, default_value = "wirepact-pki-ca")]
     secret_name: String,
 
+    /// An API key that is used to secure the endpoints that are exposed.
+    /// If provided, all gRPC calls to the PKI must set the HTTP `Authorization` header
+    /// to this value or the call will be rejected.
+    ///
+    /// This is useful to enable an exposed PKI to the public, but only allow
+    /// services with the pre-shared key to access the PKI.
+    #[clap(long, env)]
+    api_key: Option<String>,
+
     /// If set, a local pki storage is used (local file system) instead
     /// of the Kubernetes secret.
     #[clap(short, long, env)]
@@ -58,7 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut store = create_store(cli.local, cli.secret_name);
     store.init().await?;
-    let pki_service = PkiService { cert_store: store };
+    let pki_service = PkiService::new(store);
 
     #[cfg(windows)]
     async fn signal() {

@@ -6,7 +6,13 @@ use crate::cert_store::store::CertificateStore;
 use crate::pki_service::grpc::{CaCertificate, SignCsrRequest, SignCsrResponse};
 
 pub struct PkiService {
-    pub(crate) cert_store: Box<dyn CertificateStore>,
+    cert_store: Box<dyn CertificateStore>,
+}
+
+impl PkiService {
+    pub fn new(cert_store: Box<dyn CertificateStore>) -> Self {
+        Self { cert_store }
+    }
 }
 
 pub mod grpc {
