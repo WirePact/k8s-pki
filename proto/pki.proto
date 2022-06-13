@@ -5,6 +5,9 @@ package wirepact.pki;
 import "google/protobuf/empty.proto";
 
 // Service for PKI related operations.
+// If the PKI has an API-Key configured, all calls to this service
+// must provide an API-Key in the request header (HTTP Authorization Header
+// or Metadata field).
 service PkiService {
   // Return the CA certificate (public part) for this PKI.
   rpc GetCA(google.protobuf.Empty) returns (CACertificate);
