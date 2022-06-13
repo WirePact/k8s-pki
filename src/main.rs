@@ -25,6 +25,10 @@ struct Cli {
     ///
     /// This is useful to enable an exposed PKI to the public, but only allow
     /// services with the pre-shared key to access the PKI.
+    ///
+    /// #### Example
+    /// When the API key is set to `my-secret-key`, the requests with `HTTP Authorization`
+    /// header set to `my-secret-key` will be accepted (no prefix required/allowed).
     #[clap(long, env)]
     api_key: Option<String>,
 
@@ -67,7 +71,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut store = create_store(cli.local, cli.secret_name);
     store.init().await?;
-    let pki_service = PkiService::new(store);
+    let pki_service = PkiService::new(store, cli.api_key);
 
     #[cfg(windows)]
     async fn signal() {
