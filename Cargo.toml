@@ -17,6 +17,7 @@ time = "0.3.11"
 tokio = { version = "1.19.2", features = ["macros", "rt-multi-thread", "fs", "signal"] }
 tonic = { version = "0.7.2", features = ["tls", "tls-roots", "tls-roots-common"] }
 tonic-types = "0.5.0"
+tonic-web = "0.3.0"
 
 [dev-dependencies]
 tokio = { version = "1.19.2", features = ["macros", "rt-multi-thread"] }

@@ -98,7 +98,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Server::builder()
-        .add_service(grpc::pki_service_server::PkiServiceServer::new(pki_service))
+        .accept_http1(true)
+        .add_service(tonic_web::enable(
+            grpc::pki_service_server::PkiServiceServer::new(pki_service),
+        ))
         .serve_with_shutdown(address.parse()?, signal())
         .await?;
 
