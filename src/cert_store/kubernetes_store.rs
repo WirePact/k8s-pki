@@ -163,30 +163,6 @@ impl KubernetesStore {
         self.store_secret(&secret).await?;
         Ok(())
     }
-
-    async fn load_serial_number(&self) -> Result<u32, Box<dyn Error>> {
-        debug!("Load CA serial number from Kubernetes secret.");
-
-        let secret = self.load_secret().await?;
-        Ok(match secret.data.unwrap().get(SECRET_SERIAL_NUMBER) {
-            None => 0,
-            Some(data) => String::from_utf8(data.0.to_vec())?.parse()?,
-        })
-    }
-
-    async fn store_serial_number(&self, number: u32) -> Result<(), Box<dyn Error>> {
-        debug!("Store CA serial number to Kubernetes secret.");
-
-        let mut secret = self.load_secret().await?;
-        if let Some(mut data) = secret.data {
-            *data.entry(SECRET_SERIAL_NUMBER.to_string()).or_default() =
-                ByteString(number.to_string().into_bytes());
-            secret.data = Some(data);
-        }
-
-        self.store_secret(&secret).await?;
-        Ok(())
-    }
 }
 
 #[tonic::async_trait]
@@ -208,8 +184,7 @@ impl CertificateStore for KubernetesStore {
             Some(cert) => cert,
             None => {
                 info!("CA certificate does not exist, create new.");
-                let srn = self.next_serial_number().await?;
-                let certificate = create_new_ca(srn, key.as_ref())?;
+                let certificate = create_new_ca(key.as_ref())?;
                 self.store_cert(certificate.as_ref()).await?;
                 certificate
             }
@@ -220,15 +195,6 @@ impl CertificateStore for KubernetesStore {
 
         debug!("Initialized the Kubernetes secret storage.");
         Ok(())
-    }
-
-    async fn next_serial_number(&self) -> Result<u32, Box<dyn Error>> {
-        let number = self.load_serial_number().await?;
-        let next_number = number + 1;
-        self.store_serial_number(next_number).await?;
-
-        debug!("Fetched next serial number '{}'.", next_number);
-        Ok(next_number)
     }
 
     fn cert(&self) -> &X509 {

@@ -12,7 +12,6 @@ use crate::cert_store::utils::{create_new_ca, create_new_key};
 const LOCAL_FILES_PATH: &str = "./ca";
 const LOCAL_KEY_PATH: &str = "./ca/ca.key";
 const LOCAL_CERT_PATH: &str = "./ca/ca.crt";
-const LOCAL_SERIAL_NUMBERS_PATH: &str = "./ca/serialnumbers";
 
 #[derive(Debug, Default)]
 pub struct LocalStore {
@@ -58,8 +57,7 @@ impl CertificateStore for LocalStore {
             true => self.load_cert().await?,
             false => {
                 info!("CA certificate does not exist, create new.");
-                let srn = self.next_serial_number().await?;
-                let certificate = create_new_ca(srn, key.as_ref())?;
+                let certificate = create_new_ca(key.as_ref())?;
                 let cert_path = Path::new(LOCAL_CERT_PATH);
                 write(cert_path, certificate.to_pem()?).await?;
                 certificate
@@ -71,23 +69,6 @@ impl CertificateStore for LocalStore {
 
         debug!("Initialized the local storage.");
         Ok(())
-    }
-
-    async fn next_serial_number(&self) -> Result<u32, Box<dyn Error>> {
-        let path = Path::new(LOCAL_SERIAL_NUMBERS_PATH);
-
-        let number = match path.exists() {
-            true => {
-                let content = read_to_string(path).await?;
-                content.trim().parse()?
-            }
-            false => 0,
-        };
-        let next_number = number + 1;
-        write(path, next_number.to_string()).await?;
-
-        debug!("Fetched next serial number '{}'.", next_number);
-        Ok(next_number)
     }
 
     fn cert(&self) -> &X509 {
