@@ -6,6 +6,7 @@ use openssl::hash::MessageDigest;
 use openssl::nid::Nid;
 use openssl::pkey::{PKey, PKeyRef, Private};
 use openssl::rsa::Rsa;
+use openssl::x509::extension::{BasicConstraints, KeyUsage, SubjectKeyIdentifier};
 use openssl::x509::{X509Name, X509};
 
 pub fn create_new_key() -> Result<PKey<Private>, Box<dyn Error>> {
@@ -34,6 +35,20 @@ pub fn create_new_ca(serial_number: u32, key: &PKeyRef<Private>) -> Result<X509,
     builder.set_not_before(not_before.as_ref())?;
     builder.set_not_after(not_after.as_ref())?;
     builder.set_pubkey(key)?;
+
+    builder.append_extension(BasicConstraints::new().critical().ca().build()?)?;
+    builder.append_extension(
+        KeyUsage::new()
+            .critical()
+            .key_cert_sign()
+            .crl_sign()
+            .build()?,
+    )?;
+
+    let subject_key_identifier =
+        SubjectKeyIdentifier::new().build(&builder.x509v3_context(None, None))?;
+    builder.append_extension(subject_key_identifier)?;
+
     builder.sign(key, MessageDigest::sha256())?;
 
     Ok(builder.build())
