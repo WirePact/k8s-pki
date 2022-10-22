@@ -10,7 +10,7 @@ k8s-openapi = { version = "0.15.0", features = ["v1_22"] }
 kube = "0.74.0"
 log = "0.4.17"
 openssl = "0.10.42"
-openssl-sys = "0.9.76"
+openssl-sys = "0.9.77"
 prost = "0.10.4"
 prost-types = "0.10.1"
 time = "0.3.15"
