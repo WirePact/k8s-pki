@@ -13,7 +13,7 @@ openssl = "0.10.45"
 openssl-sys = "0.9.80"
 prost = "0.10.4"
 prost-types = "0.10.1"
-time = "0.3.17"
+time = "0.3.19"
 tokio = { version = "1.25.0", features = ["macros", "rt-multi-thread", "fs", "signal"] }
 tonic = { version = "0.7.2", features = ["tls", "tls-roots", "tls-roots-common"] }
 tonic-types = "0.5.0"
