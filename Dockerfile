@@ -13,7 +13,7 @@ ENV RUSTFLAGS="-C target-feature=-crt-static"
 RUN sed -i -e "s/^version = .*/version = \"${BUILD_VERSION}\"/" Cargo.toml
 RUN cargo install --path .
 
-FROM alpine:3.18
+FROM alpine:3.19
 
 ARG BUILD_VERSION
 ARG COMMIT_SHA
