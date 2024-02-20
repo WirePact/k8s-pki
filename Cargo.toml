@@ -9,7 +9,7 @@ env_logger = "0.11.2"
 k8s-openapi = { version = "0.15.0", features = ["v1_22"] }
 kube = "0.74.0"
 log = "0.4.20"
-openssl = "0.10.63"
+openssl = "0.10.64"
 openssl-sys = "0.9.99"
 prost = "0.10.4"
 prost-types = "0.10.1"
