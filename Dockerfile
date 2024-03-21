@@ -1,4 +1,4 @@
-FROM rust:1.76-alpine as build
+FROM rust:1.77-alpine as build
 
 ARG BUILD_VERSION
 
