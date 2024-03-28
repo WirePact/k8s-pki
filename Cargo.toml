@@ -11,17 +11,17 @@ kube = "0.74.0"
 log = "0.4.21"
 openssl = "0.10.64"
 openssl-sys = "0.9.101"
-prost = "0.10.4"
-prost-types = "0.10.1"
+prost = "0.12.3"
+prost-types = "0.12.3"
 time = "0.3.34"
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread", "fs", "signal"] }
-tonic = { version = "0.7.2", features = ["tls", "tls-roots", "tls-roots-common"] }
-tonic-types = "0.5.0"
-tonic-web = "0.3.0"
+tonic = { version = "0.11.0", features = ["tls", "tls-roots", "tls-roots-common"] }
+tonic-types = "0.11.0"
+tonic-web = "0.11.0"
 
 [dev-dependencies]
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
 
 [build-dependencies]
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
-tonic-build = "0.7.2"
+tonic-build = "0.11.0"
